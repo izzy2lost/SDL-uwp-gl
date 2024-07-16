@@ -61,8 +61,13 @@ jobs:
             /p:RestorePackagesConfig=true
         shell: pwsh
 
+      - name: Archive Build Output
+        run: |
+          Compress-Archive -Path $env:PackageOutputRootDir\* -DestinationPath $env:PackageOutputRootDir\${{ env.PACKAGE_NAME }}.zip
+        shell: pwsh
+
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:
           name: SDL-UWP-Build
-          path: ${{ env.PackageOutputRootDir }}/
+          path: ${{ env.PackageOutputRootDir }}/${{ env.PACKAGE_NAME }}.zip
