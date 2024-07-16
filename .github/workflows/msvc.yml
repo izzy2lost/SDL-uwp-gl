@@ -24,8 +24,6 @@ jobs:
       AppxBundle: Never
       ProjectPath: VisualC-WinRT/SDL-UWP.vcxproj
       ProjectDirectory: ./SDL-UWP 
-      PackageOutputRootDir: C:\AppPackage
-      PackageOutputDir: SDL-UWP 
 
     steps:
       - name: Checkout Repository
@@ -57,17 +55,19 @@ jobs:
             /p:UapAppxPackageBuildMode=$env:BuildMode `
             /p:AppxBundle=$env:AppxBundle `
             /p:PackageCertificateThumbprint="${{ env.THUMBPRINT }}" `
-            /p:AppxPackageTestDir="${{ env.PackageOutputRootDir }}\${{ env.PACKAGE_NAME }}" `
             /p:RestorePackagesConfig=true
         shell: pwsh
 
       - name: Archive Build Output
         run: |
-          Compress-Archive -Path $env:PackageOutputRootDir\* -DestinationPath $env:PackageOutputRootDir\${{ env.PACKAGE_NAME }}.zip
+          $outputDir = "C:\BuildOutput"
+          mkdir $outputDir
+          Copy-Item -Path .\* -Destination $outputDir -Recurse -Force
+          Compress-Archive -Path "$outputDir\*" -DestinationPath "$outputDir\${{ env.PACKAGE_NAME }}.zip"
         shell: pwsh
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:
           name: SDL-UWP-Build
-          path: ${{ env.PackageOutputRootDir }}/${{ env.PACKAGE_NAME }}.zip
+          path: C:\BuildOutput\${{ env.PACKAGE_NAME }}.zip
